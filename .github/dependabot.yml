@@ -1,0 +1,59 @@
+version: 2
+updates:
+  # Frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "typescript"
+          - "vite"
+          - "@playwright/*"
+      react:
+        patterns:
+          - "react*"
+          - "@tanstack/*"
+    labels:
+      - "dependencies"
+      - "frontend"
+
+  # Backend dependencies
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      fastapi:
+        patterns:
+          - "fastapi*"
+          - "starlette*"
+          - "pydantic*"
+      sqlalchemy:
+        patterns:
+          - "sqlalchemy*"
+          - "alembic"
+      testing:
+        patterns:
+          - "pytest*"
+          - "httpx"
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"

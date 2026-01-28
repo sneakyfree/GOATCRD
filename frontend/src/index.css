@@ -1,0 +1,380 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  @apply glass rounded-2xl p-6 shadow-xl;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #38bdf8 0%, #d946ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;
+}
+
+.btn-secondary {
+  @apply bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 border border-white/20;
+}
+
+/* Input styles */
+.input {
+  @apply w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all;
+}
+
+/* Status badges */
+.badge-eligible {
+  @apply bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-refer {
+  @apply bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-not-eligible {
+  @apply bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+/* =====================================================
+   MOBILE-FIRST RESPONSIVE UTILITIES
+   ===================================================== */
+
+/* Mobile-first base styles */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Safe area support for notched devices */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Touch-friendly button sizes (min 44px) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-primary,
+.btn-secondary {
+  min-height: 44px;
+  @apply px-4 py-3;
+}
+
+@screen sm {
+
+  .btn-primary,
+  .btn-secondary {
+    @apply py-2;
+  }
+}
+
+/* Mobile-first card padding */
+.glass-card {
+  @apply p-4;
+}
+
+@screen md {
+  .glass-card {
+    @apply p-6;
+  }
+}
+
+/* Mobile navigation styles */
+.mobile-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-white/10 z-50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+  @apply flex flex-col items-center justify-center p-3 text-white/60 transition-colors;
+}
+
+.mobile-nav-item.active {
+  @apply text-primary-400;
+}
+
+.mobile-nav-item:hover {
+  @apply text-white;
+}
+
+/* Hide mobile nav on desktop */
+@screen md {
+  .mobile-nav {
+    @apply hidden;
+  }
+}
+
+/* Desktop sidebar visible, hidden on mobile */
+.desktop-sidebar {
+  @apply hidden;
+}
+
+@screen md {
+  .desktop-sidebar {
+    @apply block;
+  }
+}
+
+/* Responsive typography */
+.text-responsive-xs {
+  @apply text-xs;
+}
+
+.text-responsive-sm {
+  @apply text-sm;
+}
+
+.text-responsive-base {
+  @apply text-sm;
+}
+
+.text-responsive-lg {
+  @apply text-base;
+}
+
+.text-responsive-xl {
+  @apply text-lg;
+}
+
+.text-responsive-2xl {
+  @apply text-xl;
+}
+
+@screen md {
+  .text-responsive-base {
+    @apply text-base;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-2xl;
+  }
+}
+
+/* Mobile-first grid utilities */
+.grid-mobile-stack {
+  @apply grid grid-cols-1 gap-4;
+}
+
+@screen md {
+  .grid-mobile-stack {
+    @apply grid-cols-2;
+  }
+}
+
+@screen lg {
+  .grid-mobile-stack {
+    @apply grid-cols-3;
+  }
+}
+
+/* Stack on mobile, row on desktop */
+.flex-mobile-stack {
+  @apply flex flex-col gap-4;
+}
+
+@screen md {
+  .flex-mobile-stack {
+    @apply flex-row;
+  }
+}
+
+/* Mobile-first slider/range input */
+input[type="range"] {
+  height: 8px;
+  @apply touch-target;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile modal fullscreen */
+.modal-mobile-fullscreen {
+  @apply fixed inset-0 z-50 bg-gray-900;
+}
+
+@screen md {
+  .modal-mobile-fullscreen {
+    @apply relative inset-auto rounded-2xl max-w-2xl mx-auto my-8;
+  }
+}
+
+/* Hide scrollbar on mobile for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Horizontal scroll container for cards */
+.scroll-snap-x {
+  @apply flex overflow-x-auto snap-x snap-mandatory scrollbar-hide;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-x>* {
+  @apply snap-center flex-shrink-0;
+}
+
+/* Pull-to-refresh indicator area */
+.pull-to-refresh-area {
+  @apply relative overflow-hidden;
+}
+
+/* Loading skeleton for mobile */
+.skeleton {
+  @apply animate-pulse bg-white/10 rounded;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 w-full;
+}
+
+.skeleton-circle {
+  @apply skeleton rounded-full;
+}
+
+/* Mobile-friendly tabs */
+.tabs-mobile {
+  @apply flex overflow-x-auto scrollbar-hide gap-1 p-1 bg-white/5 rounded-lg;
+}
+
+.tabs-mobile>button {
+  @apply flex-shrink-0 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap touch-target;
+}
+
+/* Floating action button for mobile */
+.fab {
+  @apply fixed bottom-20 right-4 w-14 h-14 rounded-full bg-primary-500 text-white shadow-xl flex items-center justify-center z-40;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@screen md {
+  .fab {
+    @apply bottom-8 right-8;
+  }
+}
+
+/* Responsive container with mobile padding */
+.container-responsive {
+  @apply px-4 mx-auto max-w-7xl;
+}
+
+@screen md {
+  .container-responsive {
+    @apply px-6;
+  }
+}
+
+@screen lg {
+  .container-responsive {
+    @apply px-8;
+  }
+}
+
+/* Bottom sheet for mobile */
+.bottom-sheet {
+  @apply fixed inset-x-0 bottom-0 bg-gray-900 rounded-t-3xl z-50;
+  padding-bottom: env(safe-area-inset-bottom);
+  max-height: 90vh;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.bottom-sheet.open {
+  transform: translateY(0);
+}
+
+.bottom-sheet-handle {
+  @apply w-12 h-1.5 bg-white/30 rounded-full mx-auto my-3;
+}
+
+/* Responsive spacing scale */
+.space-y-mobile {
+  @apply space-y-3;
+}
+
+@screen md {
+  .space-y-mobile {
+    @apply space-y-4;
+  }
+}
+
+@screen lg {
+  .space-y-mobile {
+    @apply space-y-6;
+  }
+}
