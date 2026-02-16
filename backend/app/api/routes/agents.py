@@ -210,3 +210,106 @@ async def get_available_workflows(
             },
         ]
     }
+
+
+# --- Checkpoint Gate Status (GAP-5) ---
+
+
+class CheckpointGateResponse(BaseModel):
+    """Status of a checkpoint gate."""
+
+    name: str
+    status: str  # passed, pending, blocked
+    blocking_reason: str | None = None
+
+
+@router.get("/checkpoints")
+async def get_checkpoint_status(
+    case_id: UUID,
+    current_user: CurrentUser,
+    db: DBSession,
+) -> dict[str, list[dict]]:
+    """
+    Get checkpoint gate status for a case.
+
+    Returns the status of all 3 gates:
+    - Pre-Triage: Intake data validated and complete
+    - Pre-Explanation: Scenarios generated and ranked
+    - Pre-Export: All compliance checks passed
+    """
+    # Verify case ownership
+    result = await db.execute(
+        select(Case).where(Case.id == case_id, Case.consumer_id == current_user.id)
+    )
+    case = result.scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
+
+    # Check intake completeness
+    draft_result = await db.execute(
+        select(IntakeDraft).where(IntakeDraft.case_id == case_id)
+    )
+    draft = draft_result.scalar_one_or_none()
+    has_intake = draft is not None and bool(draft.data)
+
+    # Check if scenarios exist
+    run_result = await db.execute(
+        select(ScenarioRun)
+        .where(ScenarioRun.case_id == case_id)
+        .order_by(ScenarioRun.created_at.desc())
+        .limit(1)
+    )
+    has_scenarios = run_result.scalar_one_or_none() is not None
+
+    # Build gate statuses
+    gates = []
+
+    # Gate 1: Pre-Triage
+    if has_intake:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Triage",
+            status="passed",
+        ))
+    else:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Triage",
+            status="blocked" if not draft else "pending",
+            blocking_reason="Intake data not submitted" if not draft else "Intake incomplete",
+        ))
+
+    # Gate 2: Pre-Explanation
+    if has_scenarios:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Explanation",
+            status="passed",
+        ))
+    elif has_intake:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Explanation",
+            status="pending",
+            blocking_reason="Scenarios not yet generated",
+        ))
+    else:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Explanation",
+            status="blocked",
+            blocking_reason="Pre-Triage gate not passed",
+        ))
+
+    # Gate 3: Pre-Export
+    if has_scenarios and has_intake:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Export",
+            status="passed",
+        ))
+    else:
+        gates.append(CheckpointGateResponse(
+            name="Pre-Export",
+            status="blocked",
+            blocking_reason="Pre-Explanation gate not passed",
+        ))
+
+    return {
+        "case_id": str(case_id),
+        "gates": [g.model_dump() for g in gates],
+    }

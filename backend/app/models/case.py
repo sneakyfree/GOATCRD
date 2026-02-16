@@ -102,6 +102,9 @@ class IntakeDraft(BaseModel):
     # Draft data
     data: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     
+    # Per-field provenance tracking (field_name -> {state, source_type, confidence, ...})
+    provenance: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    
     # Progress
     current_chapter: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     completed_chapters: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)

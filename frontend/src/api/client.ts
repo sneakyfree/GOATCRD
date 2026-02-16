@@ -337,6 +337,13 @@ export const pulse = {
             url: `/cases/${caseId}/pulse/subscription`,
             data: { enabled, frequency },
         }),
+
+    // Webhook sources (GAP-3)
+    getWebhookSources: () =>
+        request<Array<{ name: string; url: string; status: string; last_received: string | null; event_count: number }>>({
+            method: 'GET',
+            url: '/pulse/webhook-sources',
+        }),
 };
 
 // =============================================================================
@@ -572,6 +579,14 @@ export const partners = {
     // Usage Stats
     getUsageStats: (partnerId: string) =>
         request<unknown>({ method: 'GET', url: `/partners/${partnerId}/usage` }),
+
+    // Webhook deliveries (GAP-4)
+    getWebhookDeliveries: (partnerId: string, limit = 50) =>
+        request<{ partner_id: string; deliveries: unknown[]; total: number; success_rate: number }>({
+            method: 'GET',
+            url: `/partners/${partnerId}/webhook-deliveries`,
+            params: { limit },
+        }),
 };
 
 // =============================================================================
@@ -594,6 +609,47 @@ export const featureFlags = {
 };
 
 // =============================================================================
+// Metrics API (GAP-6)
+// =============================================================================
+export const metrics = {
+    getDashboard: () => request<unknown>({ method: 'GET', url: '/metrics/dashboard' }),
+    getPrometheus: () => request<string>({ method: 'GET', url: '/metrics/prometheus' }),
+    getRaw: () => request<unknown>({ method: 'GET', url: '/metrics/raw' }),
+};
+
+// =============================================================================
+// Notifications API (GAP-7)
+// =============================================================================
+export const notifications = {
+    list: (limit = 50, unread?: boolean, type?: string) =>
+        request<{ notifications: unknown[]; total: number; unread_count: number }>({
+            method: 'GET',
+            url: '/notifications',
+            params: { limit, unread, type },
+        }),
+
+    markRead: (notificationId: string) =>
+        request<{ success: boolean }>({ method: 'POST', url: `/notifications/${notificationId}/read` }),
+
+    markAllRead: () =>
+        request<{ success: boolean; count: number }>({ method: 'POST', url: '/notifications/read-all' }),
+
+    create: (data: { type: string; title: string; message: string }) =>
+        request<unknown>({ method: 'POST', url: '/notifications/create', data }),
+};
+
+// =============================================================================
+// Checkpoint Gates API (GAP-5)
+// =============================================================================
+export const checkpoints = {
+    getGates: (caseId: string) =>
+        request<{ case_id: string; gates: Array<{ name: string; status: string; blocking_reason: string | null }> }>({
+            method: 'GET',
+            url: `/cases/${caseId}/agents/checkpoints`,
+        }),
+};
+
+// =============================================================================
 // Default export
 // =============================================================================
 export default {
@@ -611,6 +667,9 @@ export default {
     fairness,
     partners,
     featureFlags,
+    metrics,
+    notifications,
+    checkpoints,
     setAuthToken,
     getAuthToken,
 };

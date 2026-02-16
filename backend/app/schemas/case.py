@@ -73,6 +73,7 @@ class IntakeDraftResponse(IDSchema, TimestampSchema):
     
     case_id: UUID
     data: dict[str, Any]
+    provenance: dict[str, Any] = {}
     current_chapter: int
     completed_chapters: list[int]
     contradictions: list[dict]

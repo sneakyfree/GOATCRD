@@ -15,6 +15,9 @@ from app.api.routes.pulse import router as pulse_router
 from app.api.routes.pulse import cases_pulse_router
 from app.api.routes.fairness import router as fairness_router
 from app.api.routes.alternative_data import router as alt_data_router
+from app.api.routes.payments import router as payments_router
+from app.api.routes.metrics import router as metrics_router
+from app.api.routes.notifications import router as notifications_router
 
 __all__ = [
     "auth_router",
@@ -33,5 +36,7 @@ __all__ = [
     "cases_pulse_router",
     "fairness_router",
     "alt_data_router",
+    "payments_router",
+    "metrics_router",
+    "notifications_router",
 ]
-

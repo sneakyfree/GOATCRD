@@ -29,6 +29,12 @@ import PostDeployMonitoring from './pages/PostDeployMonitoring';
 // LaaS/SDK
 import PartnerAuditLog from './pages/PartnerAuditLog';
 import PartnerAPIDocs from './pages/PartnerAPIDocs';
+// Launch Hardening
+import FAQPage from './pages/FAQPage';
+import PricingPage from './pages/PricingPage';
+// Helix Repair (Gap Closure)
+import ObservabilityPage from './pages/ObservabilityPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
     return (
@@ -36,6 +42,8 @@ function App() {
             <Route path="/" element={<Layout />}>
                 <Route index element={<HomePage />} />
                 <Route path="login" element={<LoginPage />} />
+                <Route path="faq" element={<FAQPage />} />
+                <Route path="pricing" element={<PricingPage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="intake/:caseId" element={<IntakePage />} />
                 <Route path="scenarios" element={<ScenariosPage />} />
@@ -65,6 +73,10 @@ function App() {
                 {/* LaaS/SDK Partner (S3) */}
                 <Route path="admin/partners/audit" element={<PartnerAuditLog />} />
                 <Route path="admin/partners/api-docs" element={<PartnerAPIDocs />} />
+                {/* Observability (GAP-6) */}
+                <Route path="admin/observability" element={<ObservabilityPage />} />
+                {/* Notifications (GAP-7) */}
+                <Route path="notifications" element={<NotificationsPage />} />
             </Route>
         </Routes>
     );

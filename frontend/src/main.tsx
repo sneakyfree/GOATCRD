@@ -23,3 +23,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </QueryClientProvider>
     </React.StrictMode>
 );
+
+// Register service worker for PWA support
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {
+                console.log('[GOATCRD] SW registered, scope:', registration.scope);
+            })
+            .catch((error) => {
+                console.warn('[GOATCRD] SW registration failed:', error);
+            });
+    });
+}

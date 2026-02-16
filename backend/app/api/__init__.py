@@ -18,6 +18,9 @@ from app.api.routes import (
     cases_pulse_router,
     fairness_router,
     alt_data_router,
+    payments_router,
+    metrics_router,
+    notifications_router,
 )
 
 api_router = APIRouter()
@@ -38,6 +41,9 @@ api_router.include_router(pulse_router)
 api_router.include_router(cases_pulse_router)
 api_router.include_router(fairness_router)
 api_router.include_router(alt_data_router)
+api_router.include_router(payments_router)
+api_router.include_router(metrics_router)
+api_router.include_router(notifications_router)
 
 __all__ = ["api_router"]
 

@@ -25,6 +25,7 @@ from app.schemas import (
     InviteResponse,
 )
 from app.services import AuditService
+from app.services.intake import IntakeService
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -130,6 +131,17 @@ async def create_invite(
     await db.flush()
     await db.refresh(invite)
     
+    # Send invite via email/SMS (feature-flag gated)
+    from app.services.notifications import NotificationService
+    notification_service = NotificationService()
+    await notification_service.send_invite(
+        token=token,
+        expires_at=invite.expires_at,
+        email=invite_in.send_to_email,
+        phone=invite_in.send_to_phone,
+        expires_hours=invite_in.expires_in_hours,
+    )
+    
     # Return invite with token (only shown once)
     return {
         "id": invite.id,
@@ -179,7 +191,7 @@ async def update_intake_draft(
     current_user: CurrentUser,
     db: DBSession,
 ) -> IntakeDraft:
-    """Update the intake draft (save progress)."""
+    """Update the intake draft (save progress) with provenance tracking."""
     # Verify case ownership
     result = await db.execute(
         select(Case).where(Case.id == case_id, Case.consumer_id == current_user.id)
@@ -188,26 +200,13 @@ async def update_intake_draft(
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     
-    # Get or create draft
-    result = await db.execute(
-        select(IntakeDraft).where(IntakeDraft.case_id == case_id).order_by(IntakeDraft.updated_at.desc())
+    # Delegate to IntakeService — handles provenance tracking per field
+    intake_service = IntakeService(db)
+    draft = await intake_service.update_draft(
+        case_id=case_id,
+        field_updates=draft_update.data,
+        current_chapter=draft_update.current_chapter,
     )
-    draft = result.scalar_one_or_none()
-    
-    if not draft:
-        draft = IntakeDraft(case_id=case_id, data={})
-        db.add(draft)
-    
-    # Update draft
-    draft.data = {**draft.data, **draft_update.data}
-    if draft_update.current_chapter is not None:
-        draft.current_chapter = draft_update.current_chapter
-    
-    # Update case status
-    case.status = CaseStatus.INTAKE_IN_PROGRESS
-    
-    await db.flush()
-    await db.refresh(draft)
     
     return draft
 
@@ -219,13 +218,7 @@ async def submit_intake(
     current_user: CurrentUser,
     db: DBSession,
 ) -> IntakeSnapshot:
-    """Submit intake and create immutable snapshot."""
-    if not submit.confirm_review:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You must confirm you have reviewed the information",
-        )
-    
+    """Submit intake and create immutable snapshot with normalization and provenance."""
     # Verify case ownership
     result = await db.execute(
         select(Case).where(Case.id == case_id, Case.consumer_id == current_user.id)
@@ -234,42 +227,18 @@ async def submit_intake(
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     
-    # Get draft
-    result = await db.execute(
-        select(IntakeDraft).where(IntakeDraft.case_id == case_id).order_by(IntakeDraft.updated_at.desc())
-    )
-    draft = result.scalar_one_or_none()
-    
-    if not draft or not draft.data:
+    # Delegate to IntakeService — handles normalization, provenance, contradiction checks
+    intake_service = IntakeService(db)
+    try:
+        snapshot = await intake_service.submit_intake(
+            case_id=case_id,
+            actor_id=current_user.id,
+            confirm_review=submit.confirm_review,
+        )
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No intake data to submit",
+            detail=str(e),
         )
     
-    # Create immutable snapshot
-    snapshot = IntakeSnapshot(
-        case_id=case_id,
-        raw_data=draft.data,
-        normalized_data=draft.data,  # TODO: Add normalization
-        provenance={},  # TODO: Build provenance from data sources
-        contradictions_resolved=len(draft.contradictions) == 0,
-        created_by=current_user.id,
-    )
-    
-    db.add(snapshot)
-    
-    # Update case status
-    case.status = CaseStatus.INTAKE_COMPLETE
-    
-    # Log audit event
-    audit = AuditService(db)
-    await db.flush()
-    await audit.log_intake_submitted(
-        case_id=case_id,
-        snapshot_id=snapshot.id,
-        actor_id=current_user.id,
-        actor_role=current_user.role.value,
-    )
-    
-    await db.refresh(snapshot)
     return snapshot

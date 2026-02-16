@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { MobileNav } from './MobileNav';
+import NotificationBell from './NotificationBell';
 
 export function Layout() {
     const { user, logout } = useAuthStore();
@@ -29,6 +30,12 @@ export function Layout() {
                                     <Link to="/my-data" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                                         My Data
                                     </Link>
+                                    <Link to="/faq" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                        FAQ
+                                    </Link>
+                                    <Link to="/pricing" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                        Pricing
+                                    </Link>
                                     {user && (
                                         <Link to="/dashboard" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                                             Dashboard
@@ -40,6 +47,7 @@ export function Layout() {
                         <div className="flex items-center space-x-4">
                             {user ? (
                                 <>
+                                    <NotificationBell />
                                     <span className="text-white/70 text-sm">{user.email}</span>
                                     <button
                                         onClick={logout}

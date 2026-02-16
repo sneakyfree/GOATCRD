@@ -238,26 +238,56 @@ class IntakeService:
         return snapshot
     
     def _normalize_data(self, data: dict[str, Any]) -> dict[str, Any]:
-        """Normalize intake data for consistent processing."""
+        """Normalize intake data for consistent processing across all 10 chapters."""
         normalized = dict(data)
         
-        # Normalize numeric fields
+        # Ch.1: Identity & Contact — email, phone, DOB normalization
+        if "email" in normalized and isinstance(normalized["email"], str):
+            normalized["email"] = normalized["email"].strip().lower()
+        
+        if "phone" in normalized and isinstance(normalized["phone"], str):
+            # Extract digits only, preserve country code
+            digits = "".join(c for c in normalized["phone"] if c.isdigit())
+            if len(digits) == 10:
+                digits = "1" + digits  # Add US country code
+            normalized["phone"] = digits
+        
+        if "date_of_birth" in normalized and isinstance(normalized["date_of_birth"], str):
+            # Standardize to ISO 8601 (YYYY-MM-DD)
+            dob = normalized["date_of_birth"].strip()
+            for fmt in ("%m/%d/%Y", "%m-%d-%Y", "%d/%m/%Y", "%Y/%m/%d"):
+                try:
+                    from datetime import datetime as dt
+                    parsed = dt.strptime(dob, fmt)
+                    normalized["date_of_birth"] = parsed.strftime("%Y-%m-%d")
+                    break
+                except ValueError:
+                    continue
+        
+        # Ch.1: Name trimming
+        for name_field in ("first_name", "last_name", "employer_name"):
+            if name_field in normalized and isinstance(normalized[name_field], str):
+                normalized[name_field] = normalized[name_field].strip()
+        
+        # Ch.3/4/5: Numeric fields (income, assets, debts, amounts)
         numeric_fields = [
             "annual_income", "monthly_income", "loan_amount",
-            "credit_score", "monthly_debt_payments",
+            "credit_score", "monthly_debt_payments", "savings_amount",
+            "retirement_amount", "investment_amount", "monthly_housing_payment",
+            "credit_card_balance", "auto_loan_balance", "student_loan_balance",
+            "loan_amount_requested", "employment_length_months",
         ]
         for field in numeric_fields:
             if field in normalized:
                 try:
                     value = normalized[field]
                     if isinstance(value, str):
-                        # Remove currency symbols and commas
                         value = value.replace("$", "").replace(",", "").strip()
                     normalized[field] = float(value)
                 except (ValueError, TypeError):
                     pass
         
-        # Normalize percentage fields
+        # Ch.6: Percentage fields (DTI, utilization)
         percentage_fields = ["dti_ratio", "credit_utilization"]
         for field in percentage_fields:
             if field in normalized:
@@ -266,16 +296,47 @@ class IntakeService:
                     if isinstance(value, str):
                         value = value.replace("%", "").strip()
                     value = float(value)
-                    # Convert to decimal if > 1 (e.g., 35% -> 0.35)
                     if value > 1:
                         value = value / 100
                     normalized[field] = value
                 except (ValueError, TypeError):
                     pass
         
-        # Normalize state codes
+        # Ch.7: Geography — state code and zip normalization
         if "state" in normalized:
             normalized["state"] = str(normalized["state"]).upper().strip()[:2]
+        
+        if "zip_code" in normalized and isinstance(normalized["zip_code"], str):
+            normalized["zip_code"] = normalized["zip_code"].strip()[:5]
+        
+        # Ch.3: Employment status normalization
+        if "employment_status" in normalized and isinstance(normalized["employment_status"], str):
+            status_map = {
+                "full-time": "employed", "full time": "employed", "ft": "employed",
+                "part-time": "part_time", "part time": "part_time", "pt": "part_time",
+                "self-employed": "self_employed", "self employed": "self_employed",
+                "retired": "retired", "unemployed": "unemployed",
+            }
+            raw = normalized["employment_status"].strip().lower()
+            normalized["employment_status"] = status_map.get(raw, raw)
+        
+        # Ch.7: Housing status normalization
+        if "housing_status" in normalized and isinstance(normalized["housing_status"], str):
+            housing_map = {
+                "own": "own", "homeowner": "own", "owner": "own",
+                "rent": "rent", "renter": "rent", "renting": "rent",
+                "living with family": "family", "family": "family",
+            }
+            raw = normalized["housing_status"].strip().lower()
+            normalized["housing_status"] = housing_map.get(raw, raw)
+        
+        # Ch.9: Boolean coercion for consent/agreement fields
+        bool_fields = ["consent_credit_check", "consent_data_sharing", "agree_terms"]
+        for field in bool_fields:
+            if field in normalized:
+                value = normalized[field]
+                if isinstance(value, str):
+                    normalized[field] = value.strip().lower() in ("yes", "true", "1", "y")
         
         return normalized
     

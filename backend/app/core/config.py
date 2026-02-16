@@ -51,6 +51,30 @@ class Settings(BaseSettings):
     default_confidence_cap: int = 100
     unknown_field_confidence_cap: int = 50
     contradiction_confidence_cap: int = 60
+    
+    # Notifications — Email (SendGrid)
+    enable_email_delivery: bool = False
+    sendgrid_api_key: str = ""
+    from_email: str = "noreply@goatcrd.com"
+    
+    # Notifications — SMS (Twilio)
+    enable_sms_delivery: bool = False
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""
+    
+    # Stripe — Monetization
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
+    stripe_webhook_secret: str = ""
+    
+    # Plaid — Alternative Data
+    plaid_client_id: str = ""
+    plaid_secret: str = ""
+    plaid_env: Literal["sandbox", "development", "production"] = "sandbox"
+    
+    # Frontend
+    frontend_url: str = "http://localhost:3000"
 
 
 @lru_cache
