@@ -148,7 +148,7 @@ class ErrorTracker {
         }
 
         // Log to console in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.error('[ErrorTracker]', error.message, context);
         }
     }
@@ -193,7 +193,7 @@ class ErrorTracker {
         // Don't store info, just notify and log
         this.notifyListeners(tracked);
 
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.info('[ErrorTracker]', message, context);
         }
     }
