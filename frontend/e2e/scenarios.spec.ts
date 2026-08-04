@@ -68,7 +68,6 @@ test.describe('Scenarios Page', () => {
             await page.waitForTimeout(2000);
 
             // Look for confidence indicators in cards
-            const confidenceIndicators = page.locator('text=/%|confidence|score/i');
             // This may or may not be visible depending on data state
         });
     });
@@ -94,7 +93,7 @@ test.describe('Scenarios Page', () => {
                 // Look for modal/detail view content
                 await page.waitForTimeout(500);
                 const detailView = page.locator('text=/Overview|Explain|Improve|Details/i');
-                const hasDetailView = await detailView.isVisible({ timeout: 3000 }).catch(() => false);
+                await detailView.isVisible({ timeout: 3000 }).catch(() => false);
                 // Modal may or may not appear depending on implementation
             }
         });
@@ -120,7 +119,7 @@ test.describe('Scenario Explainability', () => {
 
                 // Check for 4-layer tabs: Summary, Factors, Rules, Data
                 const layerTabs = page.locator('button').filter({ hasText: /Summary|Factors|Rules|Data/i });
-                const tabCount = await layerTabs.count();
+                await layerTabs.count();
                 // May have 4 layers visible
             }
         }

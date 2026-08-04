@@ -76,7 +76,6 @@ test.describe('Demo Confidence Suite', () => {
             await page.setViewportSize({ width: 375, height: 667 });
             await page.goto('/');
             // Check for mobile navigation (hamburger or bottom nav)
-            const mobileNav = page.locator('[data-testid="mobile-nav"], .mobile-nav, nav button[aria-label*="menu"]');
             // This is expected to be visible or nav items should be accessible
         });
 

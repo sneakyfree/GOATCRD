@@ -163,11 +163,12 @@ export function ScenariosPage() {
                 case 'highest_approval':
                     return b.confidence_score - a.confidence_score;
                 case 'best_fit':
-                default:
+                default: {
                     // Best fit combines confidence score and apr
                     const aScore = a.confidence_score - (a.pricing?.apr || 0) * 100;
                     const bScore = b.confidence_score - (b.pricing?.apr || 0) * 100;
                     return bScore - aScore;
+                }
             }
         });
     };
