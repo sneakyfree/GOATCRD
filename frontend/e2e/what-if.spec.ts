@@ -136,7 +136,6 @@ test.describe('What-If Simulator', () => {
                 await slider.fill('750');
 
                 // Check if run button becomes enabled
-                const runButton = page.locator('button').filter({ hasText: /Run Simulation/i });
                 // Button may or may not be enabled depending on validation
             }
         });
@@ -150,7 +149,6 @@ test.describe('What-If Simulator', () => {
                 await slider.fill('800');
 
                 await page.waitForTimeout(500);
-                const changesBar = page.locator('text=/pending|change/i');
                 // Preview bar should appear
             }
         });
